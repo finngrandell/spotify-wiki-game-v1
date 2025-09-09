@@ -1,0 +1,32 @@
+{
+  "name": "spotify-wiki-game-server",
+  "version": "1.0.0",
+  "description": "WebSocket server for Spotify Wiki Game multiplayer functionality",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "express": "^5.1.0",
+    "fetch": "^1.1.0",
+    "node-fetch": "^3.3.2",
+    "socket.io": "^4.8.1",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "websocket",
+    "multiplayer",
+    "game",
+    "spotify",
+    "music"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
