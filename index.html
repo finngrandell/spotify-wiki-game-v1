@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Wiki Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .connection-status {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.9rem;
+        }
+       
+        .connection-status.connected {
+            background: rgba(29, 185, 84, 0.2);
+            border-color: rgba(29, 185, 84, 0.5);
+        }
+       
+        .connection-status.disconnected {
+            background: rgba(255, 107, 107, 0.2);
+            border-color: rgba(255, 107, 107, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Landing Screen -->
+        <div class="screen landing-screen active" id="landingScreen">
+            <div class="connection-status disconnected" id="connectionStatus" style="position: fixed; top: 20px; right: 20px; padding: 10px 15px; border-radius: 20px; font-weight: 600; z-index: 1000;">
+                🔴 Disconnected
+            </div>
+            <div class="hero-section">
+                <h1 class="game-title">🎵 Spotify Wiki Game</h1>
+                <p class="game-subtitle">Navigate from artist to artist through their collaborations!</p>
+                <p class="game-description">
+                    Challenge your friends to find the shortest path between two artists using only their song collaborations.
+                    It's like Wikipedia racing, but for music lovers!
+                </p>
+            </div>
+           
+            <div class="landing-actions">
+                <div class="action-card">
+                    <h3 class="action-title">🎮 Create Game</h3>
+                    <div class="input-group">
+                        <label for="hostName">Your Name</label>
+                        <input type="text" id="hostName" class="game-input" placeholder="Enter your name" style="text-transform: none; letter-spacing: normal;">
+                    </div>
+                    <button class="btn" onclick="createLobby()">Create Lobby</button>
+                </div>
+               
+                <div class="action-card">
+                    <h3 class="action-title">🔗 Join Game</h3>
+                    <div class="input-group">
+                        <label for="playerName">Your Name</label>
+                        <input type="text" id="playerName" class="game-input" placeholder="Enter your name" style="text-transform: none; letter-spacing: normal;">
+                    </div>
+                    <div class="input-group">
+                        <label for="lobbyCode">Lobby Code</label>
+                        <input type="text" id="lobbyCode" class="game-input" placeholder="Enter code" maxlength="6">
+                    </div>
+                    <button class="btn" onclick="joinLobby()">Join Lobby</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Lobby Screen -->
+        <div class="screen" id="lobbyScreen">
+            <div class="connection-status disconnected" id="connectionStatus" style="position: fixed; top: 20px; right: 20px; padding: 10px 15px; border-radius: 20px; font-weight: 600; z-index: 1000;">
+                🔴 Disconnected
+            </div>
+            <div class="lobby-header">
+                <h2 class="game-title" style="font-size: 2.5rem;">Game Lobby</h2>
+            </div>
+           
+            <div class="lobby-code-display">
+                <div class="lobby-code" id="displayLobbyCode">ABC123</div>
+                <div class="lobby-code-label">Share this code with your friends!</div>
+            </div>
+           
+            <div class="players-section">
+                <h3 class="section-title">Players (<span id="playerCount">1</span>/8)</h3>
+                <div class="players-list" id="playersList">
+                    <!-- Players will be dynamically added here -->
+                </div>
+            </div>
+           
+            <div class="game-settings" id="gameSettings">
+                <h3 class="section-title">Game Settings</h3>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <span class="setting-label">Difficulty</span>
+                        <select class="setting-value" id="difficulty" onchange="updateGameSettings()">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">Time Limit</span>
+                        <select class="setting-value" id="timeLimit" onchange="updateGameSettings()">
+                            <option value="none">None</option>
+                            <option value="5">5 minutes</option>
+                            <option value="10" selected>10 minutes</option>
+                            <option value="15">15 minutes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+           
+            <div class="lobby-actions">
+                <button class="btn" id="readyBtn" onclick="togglePlayerReady()">Mark Ready</button>
+                <button class="btn" id="startGameBtn" onclick="startGame()" disabled>Start Game</button>
+                <button class="btn btn-secondary" onclick="leaveLobby()">Leave Lobby</button>
+            </div>
+        </div>
+
+
+        <!-- Game Screen -->
+        <div class="screen" id="gameScreen">
+            <div class="connection-status disconnected" id="connectionStatus" style="position: fixed; top: 20px; right: 20px; padding: 10px 15px; border-radius: 20px; font-weight: 600; z-index: 1000;">
+                🔴 Disconnected
+            </div>
+            <div class="game-status">
+                <div class="status-card">
+                    <div class="status-label">Current Artist</div>
+                    <div class="status-value current-artist" id="currentArtist">Taylor Swift</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Target Artist</div>
+                    <div class="status-value target-artist" id="targetArtist">Drake</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-label">Steps Taken</div>
+                    <div class="status-value path-steps" id="stepCount">0</div>
+                </div>
+            </div>
+           
+            <div class="path-display" id="pathDisplay">
+                <div class="path-title">Your Path:</div>
+                <div class="path-chain" id="pathChain">
+                    <span class="path-artist">Taylor Swift</span>
+                </div>
+            </div>
+           
+            <div class="lobby-actions">
+                <button class="btn btn-secondary" onclick="goBack()">Go Back</button>
+                <button class="btn btn-secondary" onclick="returnToLobby()">Return to Lobby</button>
+            </div>
+           
+            <div class="artist-page" id="artistPage">
+                <!-- Artist content will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
+
+    <script src="client.js"></script>
+    <!-- <script type="module"src="./app.js"></script> -->
+</body>
+</html>
+
